@@ -68,7 +68,7 @@ $(function() {
   $(document).ready(function() {
     setTimeout(function() {
       detection();
-    }, 500);
+    }, 400);
 
     for (var i = 0; i < items.length; i++) {
       var d = 0,
