@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import useStyles from './styles.js'
 import { TextField, Button, Typography, Paper } from '@material-ui/core';
 import FileBase from 'react-file-base64';
-import {useDispatch} from 'react-redux'
-import {createPost} from '../../action/posts.js'
+import {useDispatch, useSelector} from 'react-redux'
+import {createPost,updatePost } from '../../action/posts.js'
+
 
 const Form = ({currentId, setCurrentId}) => {
     const classes = useStyles();
+    const post = useSelector((state)=> currentId ? state.posts.find((p)=> p._id == currentId): null)
     const [postData,setPostData] =  useState({
         creator:'', 
         title: '', 
@@ -15,11 +17,21 @@ const Form = ({currentId, setCurrentId}) => {
         selectedFile:'',
     })
     const dispatch = useDispatch()
+    useEffect(() => {
+       if(post) setPostData(post);
+    }, [post])
     const handleSubmit = (e) =>{
-        e.preventDefault()
-       dispatch(createPost(postData))
+        e.preventDefault();
+        if(currentId){
+            dispatch(updatePost(currentId, postData));
+
+        }else{ 
+            dispatch(createPost(postData))
+        }
+        clear();
     }
     const clear = () =>{
+        setCurrentId(null);
        setPostData({
         creator:'', 
         title: '', 
@@ -35,7 +47,7 @@ const Form = ({currentId, setCurrentId}) => {
             noValidate 
             className={`${classes.form} ${classes.root}`} 
             onSubmit={handleSubmit}>
-                 <Typography variant="h2"> Creation des memoires</Typography>
+                 <Typography variant="h2">{currentId ? 'Editing' : 'Creating'} a memoires</Typography>
                  <TextField 
                     name="creator" 
                     variant="outlined" 
@@ -64,13 +76,7 @@ const Form = ({currentId, setCurrentId}) => {
                     fullWidth
                     value={postData.tags}
                     onChange={(e)=>setPostData({...postData, tags: e.target.value})}/>
-                     <TextField 
-                    name="creator" 
-                    variant="outlined" 
-                    label="SelectedFile" 
-                    fullWidth
-                    value={postData.selectedFile}
-                    onChange={(e)=>setPostData({...postData, selectedFile: e.target.value})}/>
+                   
                     <div className={classes.fileInput}>
                         <FileBase
                             type="file"
